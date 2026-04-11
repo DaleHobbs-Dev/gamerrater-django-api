@@ -1,0 +1,46 @@
+Table Players {
+  id integer [pk, increment]
+  name varchar(255)
+  email varchar(255) [unique]
+}
+
+Table Games {
+  id integer [pk, increment]
+  player_id integer [ref: > Players.id]
+  title varchar(255) [unique]
+  description text
+  designer varchar(255)
+  year_released integer
+  num_players integer
+  time_to_play integer
+  age_recommendation integer
+  created_at timestamp
+}
+
+Table Categories {
+  id integer [pk, increment]
+  name varchar(255)
+}
+
+Table GameCategories {
+  game_id integer [ref: > Games.id]
+  category_id integer [ref: > Categories.id]
+  primary key (game_id, category_id)
+}
+
+Table GamePictures {
+  id integer [pk, increment]
+  game_id integer [ref: > Games.id]
+  player_id integer [ref: > Players.id]
+  url varchar(255)
+  created_at timestamp
+}
+
+Table GameRatings {
+  id integer [pk, increment]
+  game_id integer [ref: > Games.id]
+  player_id integer [ref: > Players.id]
+  rating integer
+  review text
+  created_at timestamp
+}
