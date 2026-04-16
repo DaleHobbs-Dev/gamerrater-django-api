@@ -2,6 +2,7 @@ Table Players {
   id integer [pk, increment]
   name varchar(255)
   email varchar(255) [unique]
+  bio text
 }
 
 Table Games {
