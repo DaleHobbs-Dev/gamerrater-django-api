@@ -7,7 +7,7 @@ Table Players {
 
 Table Games {
   id integer [pk, increment]
-  player_id integer [ref: > Players.id]
+  created_by_player_id integer [ref: > Players.id]
   title varchar(255) [unique]
   description text
   designer varchar(255)
@@ -20,7 +20,7 @@ Table Games {
 
 Table Categories {
   id integer [pk, increment]
-  name varchar(255)
+  name varchar(255) [unique]
 }
 
 Table GameCategories {
@@ -44,4 +44,7 @@ Table GameRatings {
   rating integer
   review text
   created_at timestamp
+  indexes {
+    (game_id, player_id) [unique]
+  }
 }

@@ -1,0 +1,57 @@
+[
+  {
+    "model": "raterapi.gamerating",
+    "pk": 1,
+    "fields": {
+      "game": 1,
+      "player": 1,
+      "rating": 8,
+      "review": "A classic. Great for groups but can run long.",
+      "created_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "raterapi.gamerating",
+    "pk": 2,
+    "fields": {
+      "game": 1,
+      "player": 2,
+      "rating": 7,
+      "review": "Fun but the trading phase can stall out.",
+      "created_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "raterapi.gamerating",
+    "pk": 3,
+    "fields": {
+      "game": 2,
+      "player": 1,
+      "rating": 9,
+      "review": "One of the best cooperative games out there.",
+      "created_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "raterapi.gamerating",
+    "pk": 4,
+    "fields": {
+      "game": 3,
+      "player": 2,
+      "rating": 8,
+      "review": "Deck building at its finest. Simple to learn, deep to master.",
+      "created_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "raterapi.gamerating",
+    "pk": 5,
+    "fields": {
+      "game": 4,
+      "player": 1,
+      "rating": 10,
+      "review": "Incredible campaign experience. Worth every hour.",
+      "created_at": "2024-01-01T00:00:00Z"
+    }
+  }
+]
