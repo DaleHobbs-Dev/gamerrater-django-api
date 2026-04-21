@@ -2,6 +2,7 @@
 
 from rest_framework import viewsets, status, serializers, permissions
 from rest_framework.response import Response
+from django.db import IntegrityError
 from raterapi.models import Game
 from .category_views import CategorySerializer
 
@@ -36,8 +37,7 @@ class GameSerializer(serializers.ModelSerializer):
 class GameViewSet(viewsets.ViewSet):
     """ViewSet for handling Game CRUD operations."""
 
-    # Commenting out the authentication requirement for games
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
     def list(self, request):
         """Handle GET requests to list all games."""
@@ -55,10 +55,19 @@ class GameViewSet(viewsets.ViewSet):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
     def create(self, request):
-        serializer = GameSerializer(data=request.data)
+        """Handle POST requests to create a new game."""
+        serializer = GameSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
-            serializer.save(user=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            try:
+                game: Game = serializer.save(user=request.user)
+                category_ids = request.data.get("categories", [])
+                game.categories.set(category_ids)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except IntegrityError:
+                return Response(
+                    {"error": "You have already added a game with that title."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, pk=None):
@@ -79,6 +88,25 @@ class GameViewSet(viewsets.ViewSet):
             )
             if serializer.is_valid():
                 serializer.save(user=request.user)
+                category_ids = request.data.get("categories", [])
+                game.categories.set(category_ids)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Game.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+    def partial_update(self, request, pk=None):
+        """Handle PATCH requests to partially update a single game by its primary key (pk)."""
+        try:
+            game = Game.objects.get(pk=pk)
+            serializer = GameSerializer(
+                game, data=request.data, partial=True, context={"request": request}
+            )
+            if serializer.is_valid():
+                serializer.save(user=request.user)
+                category_ids = request.data.get("categories", [])
+                if "categories" in request.data:
+                    game.categories.set(category_ids)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Game.DoesNotExist:
