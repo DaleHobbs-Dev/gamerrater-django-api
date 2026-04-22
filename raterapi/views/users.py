@@ -17,7 +17,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["id", "username", "password", "first_name", "last_name"]
+        fields = ["id", "username", "password", "first_name", "last_name", "is_staff"]
         extra_kwargs = {"password": {"write_only": True}}
 
     def validate_password(self, value):
@@ -49,6 +49,7 @@ class UserViewSet(viewsets.ViewSet):
                 username=serializer.validated_data["username"],
                 first_name=serializer.validated_data["first_name"],
                 last_name=serializer.validated_data["last_name"],
+                is_staff=False,
                 password=serializer.validated_data["password"],
             )
             token, created = Token.objects.get_or_create(user=user)

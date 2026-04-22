@@ -18,7 +18,7 @@ class GamePictureSerializer(serializers.ModelSerializer):
         model = GamePicture
         fields = [
             "id",
-            "game_id",
+            "game",
             "url",
             "is_owner",
         ]

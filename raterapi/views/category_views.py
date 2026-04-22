@@ -16,8 +16,8 @@ class CategorySerializer(serializers.ModelSerializer):
 class CategoryViewSet(viewsets.ViewSet):
     """ViewSet for handling Category CRUD operations."""
 
-    # Commenting out the authentication requirement for categories
-    # permission_classes = [permissions.IsAuthenticated]
+    # All category endpoints require authentication, but only staff users can create, update, or delete categories.
+    permission_classes = [permissions.IsAuthenticated]
 
     def list(self, request):
         """Handle GET requests to list all categories."""
@@ -35,6 +35,9 @@ class CategoryViewSet(viewsets.ViewSet):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
     def create(self, request):
+        """Handle POST requests to create a new category."""
+        if not request.user.is_staff:
+            return Response(status=status.HTTP_403_FORBIDDEN)
         serializer = CategorySerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -43,6 +46,8 @@ class CategoryViewSet(viewsets.ViewSet):
 
     def destroy(self, request, pk=None):
         """Handle DELETE requests for a single category by its primary key (pk)."""
+        if not request.user.is_staff:
+            return Response(status=status.HTTP_403_FORBIDDEN)
         try:
             category = Category.objects.get(pk=pk)
             category.delete()
@@ -52,6 +57,8 @@ class CategoryViewSet(viewsets.ViewSet):
 
     def update(self, request, pk=None):
         """Handle PUT requests to update a single category by its primary key (pk)."""
+        if not request.user.is_staff:
+            return Response(status=status.HTTP_403_FORBIDDEN)
         try:
             category = Category.objects.get(pk=pk)
             serializer = CategorySerializer(category, data=request.data)
