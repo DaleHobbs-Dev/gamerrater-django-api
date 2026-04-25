@@ -14,6 +14,10 @@ class GameSerializer(serializers.ModelSerializer):
 
     is_owner = serializers.SerializerMethodField()
 
+    # my_rating uses SerializerMethodField instead of a model @property because it depends
+    # on request.user -- the model has no access to who is making the request
+    my_rating = serializers.SerializerMethodField()
+
     # average_rating is a read-only field that calculates the average rating for the game
     # this helps serializer know it is computed and should not be provided by the client when creating or updating a game
     average_rating = serializers.FloatField(read_only=True)
@@ -21,6 +25,14 @@ class GameSerializer(serializers.ModelSerializer):
     # returns True if the current request user is the owner of the game
     def get_is_owner(self, obj):
         return self.context["request"].user == obj.user
+
+    def get_my_rating(self, obj):
+        user = self.context["request"].user
+        try:
+            rating = obj.ratings.get(player=user)
+            return rating.rating
+        except obj.ratings.model.DoesNotExist:
+            return None
 
     class Meta:
         model = Game
@@ -35,6 +47,7 @@ class GameSerializer(serializers.ModelSerializer):
             "time_to_play",
             "age_recommendation",
             "categories",
+            "my_rating",
             "average_rating",
         ]
 
