@@ -28,5 +28,21 @@ class Game(models.Model):
 
         return f"{self.title} by {self.designer}"
 
+    @property
+    def average_rating(self):
+        """Average rating calculated attribute for each game"""
+        ratings = self.ratings.all()
+
+        # Sum all of the ratings for the game
+        total_rating = 0
+        for rating in ratings:
+            total_rating += rating.rating
+        # Calculate the average rating
+        if ratings.count() > 0:
+            average = total_rating / ratings.count()
+        else:
+            average = 0
+        return average
+
     class Meta:
         unique_together = ("title", "user")

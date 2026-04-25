@@ -8,7 +8,8 @@ from .game import Game
 class GameRating(models.Model):
     """Represents a rating for a game"""
 
-    game = models.ForeignKey(Game, on_delete=models.CASCADE)
+    # The related_name "ratings" allows us to access all ratings for a game using game.ratings
+    game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name="ratings")
     player = models.ForeignKey(User, on_delete=models.CASCADE)
     rating = models.IntegerField()
     review = models.TextField(blank=True, null=True)
