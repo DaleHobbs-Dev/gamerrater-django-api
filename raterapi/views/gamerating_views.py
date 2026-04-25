@@ -5,13 +5,23 @@ from rest_framework.response import Response
 
 # import IntegrityError to handle unique constraint violation when a user tries to create multiple ratings for the same game
 from django.db import IntegrityError
+from django.contrib.auth.models import User
 from raterapi.models import GameRating
+
+
+class RatingUserSerializer(serializers.ModelSerializer):
+    """Serializer for the Player model."""
+
+    class Meta:
+        model = User
+        fields = ["id", "first_name", "last_name", "username"]
 
 
 class GameRatingSerializer(serializers.ModelSerializer):
     """Serializer for the GameRating model."""
 
     is_owner = serializers.SerializerMethodField()
+    player = RatingUserSerializer(read_only=True)
 
     # returns True if the current request user is the owner of the game rating
     def get_is_owner(self, obj):
@@ -26,6 +36,7 @@ class GameRatingSerializer(serializers.ModelSerializer):
             "rating",
             "review",
             "is_owner",
+            "player",
         ]
 
 
