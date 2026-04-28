@@ -18,8 +18,8 @@ class GamePicture(models.Model):
         upload_to=game_image_upload_path,
         null=True,
     )
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    player = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Picture for {self.game.title} uploaded by {self.user.username}"
+        return f"Picture for {self.game.title} uploaded by {self.player.username}"

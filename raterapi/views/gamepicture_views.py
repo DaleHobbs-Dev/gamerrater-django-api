@@ -3,18 +3,28 @@
 import uuid
 import base64
 from django.core.files.base import ContentFile
+from django.contrib.auth.models import User
 from rest_framework import viewsets, status, serializers
 from rest_framework.response import Response
 from raterapi.models import GamePicture
+
+
+class RatingUserSerializer(serializers.ModelSerializer):
+    """Serializer for the Player model."""
+
+    class Meta:
+        model = User
+        fields = ["id", "first_name", "last_name", "username"]
 
 
 class GamePictureSerializer(serializers.ModelSerializer):
     """Serializer for the GamePicture model."""
 
     is_owner = serializers.SerializerMethodField()
+    player = RatingUserSerializer(read_only=True)
 
     def get_is_owner(self, obj):
-        return self.context["request"].user == obj.user
+        return self.context["request"].user == obj.player
 
     class Meta:
         model = GamePicture
@@ -23,6 +33,7 @@ class GamePictureSerializer(serializers.ModelSerializer):
             "game",
             "action_pic",
             "is_owner",
+            "player",
         ]
 
 
@@ -31,10 +42,10 @@ class GamePictureViewSet(viewsets.ViewSet):
 
     def list(self, request):
         """Handle GET requests to list all game pictures."""
-        game_id = request.query_params.get("game_id", None)
+        game_id = request.query_params.get("game", None)
 
         if game_id is not None:
-            game_pictures = GamePicture.objects.filter(game_id=game_id)
+            game_pictures = GamePicture.objects.filter(game=game_id)
         else:
             game_pictures = GamePicture.objects.all()
 
@@ -77,7 +88,7 @@ class GamePictureViewSet(viewsets.ViewSet):
         # Create the GamePicture instance and save the image
         game_picture = GamePicture.objects.create(
             game_id=request.data["game"],
-            user=request.user,
+            player=request.user,
         )
         game_picture.action_pic.save(image_data.name, image_data, save=True)
 
