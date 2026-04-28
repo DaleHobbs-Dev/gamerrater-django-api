@@ -1,5 +1,6 @@
 """URL configuration for raterproject."""
 
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
@@ -10,6 +11,7 @@ from raterapi.views import (
     GameRatingViewSet,
     GameViewSet,
 )
+from raterproject import settings
 
 router = DefaultRouter(trailing_slash=False)
 router.register(r"users", UserViewSet, basename="user")
@@ -27,4 +29,4 @@ urlpatterns = [
         "register", UserViewSet.as_view({"post": "register_account"}), name="register"
     ),
     path("me", UserViewSet.as_view({"get": "me"}), name="me"),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
