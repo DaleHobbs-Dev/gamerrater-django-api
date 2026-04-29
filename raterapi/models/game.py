@@ -15,6 +15,8 @@ class Game(models.Model):
     num_players = models.IntegerField(blank=True, null=True)
     time_to_play = models.IntegerField(blank=True, null=True)
     age_recommendation = models.IntegerField(blank=True, null=True)
+    game_image = models.URLField(blank=True, null=True)
+    bgg_id = models.IntegerField(blank=True, null=True, unique=True)
     categories = models.ManyToManyField(
         "Category", through="GameCategory", related_name="games"
     )

@@ -2,6 +2,7 @@
 
 from rest_framework import viewsets, status, serializers
 from rest_framework.response import Response
+from django.db.models import Q
 
 # import IntegrityError to handle unique constraint violation when a user tries to create multiple ratings for the same game
 from django.db import IntegrityError
@@ -51,6 +52,14 @@ class GameRatingViewSet(viewsets.ViewSet):
 
         if game_id is not None:
             game_ratings = GameRating.objects.filter(game_id=game_id)
+            search = request.query_params.get("q", None)
+            if search:
+                game_ratings = game_ratings.filter(
+                    Q(review__icontains=search)
+                    | Q(player__username__icontains=search)
+                    | Q(player__first_name__icontains=search)
+                    | Q(player__last_name__icontains=search)
+                )
         else:
             game_ratings = GameRating.objects.all()
 

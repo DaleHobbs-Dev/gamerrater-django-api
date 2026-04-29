@@ -3,6 +3,7 @@
 from rest_framework import viewsets, status, serializers, permissions
 from rest_framework.response import Response
 from django.db import IntegrityError
+from django.db.models import Q
 from raterapi.models import Game
 from .category_views import CategorySerializer
 
@@ -47,6 +48,8 @@ class GameSerializer(serializers.ModelSerializer):
             "time_to_play",
             "age_recommendation",
             "categories",
+            "game_image",
+            "bgg_id",
             "my_rating",
             "average_rating",
         ]
@@ -59,7 +62,48 @@ class GameViewSet(viewsets.ViewSet):
 
     def list(self, request):
         """Handle GET requests to list all games."""
+
+        search = request.query_params.get("q", None)
         games = Game.objects.all()
+
+        # Category Filtering
+        category_id = request.query_params.get("category", None)
+        if category_id is not None:
+            games = games.filter(categories__id=category_id)
+
+        if search:
+            games = games.filter(
+                Q(title__icontains=search)
+                | Q(description__icontains=search)
+                | Q(designer__icontains=search)
+            )
+        # Logic for ordering games based on query parameters 'orderby' and 'direction'
+        # Endpoint Example: /games?orderby=year&direction=desc
+
+        # Get the 'orderby' query parameters from the request
+        ordering = request.query_params.get("orderby", None)
+
+        # Map orderby values to model fields for security and to prevent ordering by fields that don't exist:
+        # year -> year_released
+        # players -> num_players
+        # time -> time_to_play
+        # designer -> designer
+        ordering_fields = {
+            "year": "year_released",
+            "players": "num_players",
+            "time": "time_to_play",
+            "designer": "designer",
+        }
+        # Get the 'direction' query parameter to determine ascending or descending order
+        direction = request.query_params.get("direction", "asc")
+
+        # If ordering is specified, order the queryset accordingly
+        if ordering in ordering_fields:
+            field = ordering_fields[ordering]
+            if direction == "desc":
+                field = f"-{field}"
+            games = games.order_by(field)
+
         serializer = GameSerializer(games, many=True, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -77,11 +121,17 @@ class GameViewSet(viewsets.ViewSet):
         serializer = GameSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
             try:
-                game: Game = serializer.save(user=request.user)
+                game = serializer.save(user=request.user)
                 category_ids = request.data.get("categories", [])
                 game.categories.set(category_ids)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-            except IntegrityError:
+            except IntegrityError as e:
+                # Check which unique constraint was violated and return a specific message
+                if "bgg_id" in str(e):
+                    return Response(
+                        {"error": "A game with that BGG ID already exists."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
                 return Response(
                     {"error": "You have already added a game with that title."},
                     status=status.HTTP_400_BAD_REQUEST,
@@ -105,10 +155,22 @@ class GameViewSet(viewsets.ViewSet):
                 game, data=request.data, context={"request": request}
             )
             if serializer.is_valid():
-                serializer.save(user=request.user)
-                category_ids = request.data.get("categories", [])
-                game.categories.set(category_ids)
-                return Response(serializer.data, status=status.HTTP_200_OK)
+                try:
+                    serializer.save(user=request.user)
+                    category_ids = request.data.get("categories", [])
+                    game.categories.set(category_ids)
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+                except IntegrityError as e:
+                    # Check which unique constraint was violated and return a specific message
+                    if "bgg_id" in str(e):
+                        return Response(
+                            {"error": "A game with that BGG ID already exists."},
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
+                    return Response(
+                        {"error": "You have already added a game with that title."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Game.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -121,11 +183,23 @@ class GameViewSet(viewsets.ViewSet):
                 game, data=request.data, partial=True, context={"request": request}
             )
             if serializer.is_valid():
-                serializer.save(user=request.user)
-                category_ids = request.data.get("categories", [])
-                if "categories" in request.data:
-                    game.categories.set(category_ids)
-                return Response(serializer.data, status=status.HTTP_200_OK)
+                try:
+                    serializer.save(user=request.user)
+                    category_ids = request.data.get("categories", [])
+                    if "categories" in request.data:
+                        game.categories.set(category_ids)
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+                except IntegrityError as e:
+                    # Check which unique constraint was violated and return a specific message
+                    if "bgg_id" in str(e):
+                        return Response(
+                            {"error": "A game with that BGG ID already exists."},
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
+                    return Response(
+                        {"error": "You have already added a game with that title."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Game.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
