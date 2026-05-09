@@ -142,6 +142,11 @@ class GameViewSet(viewsets.ViewSet):
         """Handle DELETE requests for a single game by its primary key (pk)."""
         try:
             game = Game.objects.get(pk=pk)
+
+            # Only allow the owner of the game to delete it
+            if game.user != request.user:
+                return Response(status=status.HTTP_403_FORBIDDEN)
+
             game.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Game.DoesNotExist:
@@ -151,6 +156,11 @@ class GameViewSet(viewsets.ViewSet):
         """Handle PUT requests to update a single game by its primary key (pk)."""
         try:
             game = Game.objects.get(pk=pk)
+
+            # Only allow the owner of the game to update it
+            if game.user != request.user:
+                return Response(status=status.HTTP_403_FORBIDDEN)
+
             serializer = GameSerializer(
                 game, data=request.data, context={"request": request}
             )
@@ -179,6 +189,11 @@ class GameViewSet(viewsets.ViewSet):
         """Handle PATCH requests to partially update a single game by its primary key (pk)."""
         try:
             game = Game.objects.get(pk=pk)
+
+            # Only allow the owner of the game to partially update it
+            if game.user != request.user:
+                return Response(status=status.HTTP_403_FORBIDDEN)
+
             serializer = GameSerializer(
                 game, data=request.data, partial=True, context={"request": request}
             )

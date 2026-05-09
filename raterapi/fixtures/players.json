@@ -1,0 +1,18 @@
+[
+  {
+    "model": "raterapi.player",
+    "pk": 1,
+    "fields": {
+      "user": 1,
+      "bio": "Lifelong board game enthusiast. Loves strategy games and anything that takes over two hours to finish."
+    }
+  },
+  {
+    "model": "raterapi.player",
+    "pk": 2,
+    "fields": {
+      "user": 2,
+      "bio": "Casual gamer who got competitive. Specializes in deck builders and cooperative games."
+    }
+  }
+]
