@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Ratings Report</title>
+</head>
+
+<body>
+    <h1>Game Ratings Report</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Game</th>
+                <th>Player</th>
+                <th>Rating</th>
+                <th>Review</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rating in ratings %}
+            <tr>
+                <td>{{ rating.game.title }}</td>
+                <td>{{ rating.player.username }}</td>
+                <td>{{ rating.rating }}</td>
+                <td>{{ rating.review }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <canvas id="ratingsChart"></canvas>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const labels = [{% for rating in ratings %}"{{ rating.game.title }}", {% endfor %}];
+        const data = [{% for rating in ratings %}{{ rating.rating }}, {% endfor %}];
+
+        new Chart(document.getElementById("ratingsChart"), {
+            type: "bar",
+            data: {
+                labels: labels,
+                datasets: [{ label: "Rating", data: data }]
+            }
+        });
+    </script>
+</body>
+
+</html>

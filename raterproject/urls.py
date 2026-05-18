@@ -11,6 +11,7 @@ from raterapi.views import (
     GameRatingViewSet,
     GameViewSet,
 )
+from raterapi.views.report_views import ratings_report
 from raterproject import settings
 
 router = DefaultRouter(trailing_slash=False)
@@ -22,6 +23,11 @@ router.register(r"gameratings", GameRatingViewSet, basename="gamerating")
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path(
+        "reports/ratings",
+        ratings_report,
+        name="ratings_report",
+    ),
     path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),
     path("", include(router.urls)),
     path("login", UserViewSet.as_view({"post": "user_login"}), name="login"),

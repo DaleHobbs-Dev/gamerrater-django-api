@@ -62,10 +62,12 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "raterproject.urls"
 
+# Templates
+# DIRS is the list of directories where Django will look for templates.
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
