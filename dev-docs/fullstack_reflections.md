@@ -350,3 +350,10 @@ These questions are meant to help you reflect on the concepts and skills that we
     > - **JSON is a string, not a JavaScript object.** When your server sends a response and your `fetch()` call calls `.json()` on it, that step is converting the raw string into an actual JavaScript object. Before that call, it is just text.
     > - **Not all JavaScript values are valid JSON.** `undefined`, functions, and `Date` objects do not exist in JSON. If you try to serialize them, they will be silently dropped or cause an error. Dates in JSON are typically represented as ISO 8601 strings like `"2024-01-15T10:30:00Z"`.
     > - **JSON is language-agnostic.** Despite the "JavaScript" in the name, JSON is just a text format. Your Django backend sends it, your React frontend parses it, and the two never need to know anything about each other's language or runtime. This is exactly what makes it useful as a communication format between different systems.
+
+## Codex Question and Practice Interview Session
+
+Q: In React, what is useEffect for, and how does the dependency array change when the effect runs?
+A: `useEffect` lets a React component perform side effects after rendering, such as fetching data from an API, setting up subscriptions, timers, or event listeners. The first argument is the effect function. It can optionally return a cleanup function, which runs when the component unmounts or before the effect runs again. The second argument is the dependency array. If it is empty, the effect runs after the first render. If it contains values, the effect runs after the first render and again whenever one of those values changes. If there is no dependency array, the effect runs after every render.
+> Note: A cleanup function can prevent stale state updates or unsubscribe/clear things, but a basic fetch will keep going unless you actively abort it.
+
